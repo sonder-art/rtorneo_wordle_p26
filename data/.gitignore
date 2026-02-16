@@ -1,0 +1,7 @@
+# Downloaded corpus files (large, regenerated via download_words.py)
+.cache/
+spanish_*.csv
+spanish_*.txt
+
+# Keep mini test corpora (small, committed)
+!mini_spanish_*.txt

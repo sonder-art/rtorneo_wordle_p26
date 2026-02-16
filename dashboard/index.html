@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Wordle Tournament — ITAM</title>
+  <link rel="stylesheet" href="css/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+</head>
+<body>
+  <header>
+    <h1>Wordle Tournament</h1>
+    <p id="tournament-info">Cargando...</p>
+  </header>
+
+  <main>
+    <!-- Control Panel -->
+    <section id="control-section">
+      <h2>Panel de Control</h2>
+      <div id="control-panel">
+        <div class="control-row">
+          <div class="control-group">
+            <label for="num-games">Juegos por ronda</label>
+            <input type="number" id="num-games" value="100" min="1" max="5000" step="10">
+          </div>
+          <div class="control-group">
+            <label for="repetitions">Repeticiones</label>
+            <input type="number" id="repetitions" value="1" min="1" max="10">
+          </div>
+          <div class="control-group">
+            <label for="shock">Shock (%)</label>
+            <input type="number" id="shock" value="0" min="0" max="50" step="1">
+          </div>
+          <div class="control-group control-group-wide">
+            <label for="tournament-name">Nombre (opcional)</label>
+            <input type="text" id="tournament-name" value="" placeholder="ej: Torneo Final P26">
+          </div>
+        </div>
+        <div class="control-row preset-buttons">
+          <span class="preset-label">Presets:</span>
+          <button id="btn-quick" class="btn btn-preset" onclick="selectPreset('quick')"
+            title="10 juegos, 1 rep, sin shock">
+            Rapido
+          </button>
+          <button id="btn-official" class="btn btn-preset" onclick="selectPreset('official')"
+            title="100 juegos, 1 rep, sin shock">
+            Oficial
+          </button>
+          <button id="btn-real" class="btn btn-preset" onclick="selectPreset('real')"
+            title="100 juegos, 3 reps, 5% shock">
+            Real
+          </button>
+        </div>
+        <div id="time-estimate" class="time-estimate"></div>
+        <div class="control-row launch-row">
+          <button id="btn-launch" class="btn btn-launch" onclick="launchTournament()">
+            Lanzar Torneo
+          </button>
+          <button id="btn-stop" class="btn btn-stop" onclick="stopTournament()" disabled>
+            Detener
+          </button>
+        </div>
+        <div id="tournament-status" class="status-idle">
+          <span id="status-indicator"></span>
+          <span id="status-text">Listo</span>
+        </div>
+        <div id="progress-bar-container" style="display:none;">
+          <div class="progress-bar">
+            <div class="progress-bar-fill" id="progress-fill" style="width:0%"></div>
+            <div class="progress-bar-text" id="progress-text"></div>
+          </div>
+          <div class="progress-rounds" id="progress-rounds"></div>
+        </div>
+        <div id="log-toggle" style="display:none;">
+          <a href="#" onclick="toggleLog(); return false;">Ver log del torneo</a>
+        </div>
+        <pre id="tournament-log"></pre>
+      </div>
+    </section>
+
+    <!-- Leaderboard -->
+    <section id="leaderboard-section">
+      <div class="section-header">
+        <h2>Leaderboard</h2>
+        <div id="run-selector">
+          <label for="run-dropdown">Torneo:</label>
+          <select id="run-dropdown" onchange="selectRun(this.value)">
+            <option value="">Ultimo torneo</option>
+          </select>
+        </div>
+      </div>
+      <table id="leaderboard-table">
+        <thead>
+          <tr>
+            <th data-sort="rank">Rank</th>
+            <th data-sort="strategy">Estrategia</th>
+            <th data-sort="total_points">Puntos</th>
+            <th data-sort="overall_solve_rate">% Resuelto</th>
+            <th data-sort="overall_mean_guesses">Media Intentos</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+      <div class="scoring-explanation">
+        <h3>Sistema de Puntuacion</h3>
+        <p>Se usa <b>Borda Count</b>: en cada ronda, las estrategias se ordenan por
+        media de intentos (menor = mejor). La mejor recibe N puntos
+        (N = total de estrategias), la segunda N&minus;1, y asi sucesivamente.
+        Timeouts y juegos no resueltos cuentan como <code>max_guesses + 1</code>
+        intentos. El puntaje final es la suma de todas las rondas
+        (6 configuraciones &times; K repeticiones). Se muestran <b>todas</b> las
+        estrategias; el top 3 se destaca con medallas.</p>
+      </div>
+    </section>
+
+    <!-- Round selector -->
+    <section id="rounds-section">
+      <h2>Detalle por Ronda</h2>
+      <div id="round-tabs"></div>
+      <div id="round-detail">
+        <table id="round-table">
+          <thead>
+            <tr>
+              <th>Estrategia</th>
+              <th>Juegos</th>
+              <th>Resueltos</th>
+              <th>% Resuelto</th>
+              <th>Media</th>
+              <th>Mediana</th>
+              <th>Max</th>
+              <th>Timeouts</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+        <div id="round-charts"></div>
+      </div>
+    </section>
+
+    <!-- Strategy comparison -->
+    <section id="comparison-section">
+      <h2>Comparacion de Estrategias</h2>
+      <div id="comparison-controls">
+        <label>Selecciona estrategias para comparar:</label>
+        <div id="strategy-checkboxes"></div>
+      </div>
+      <div id="comparison-chart-container">
+        <canvas id="comparison-chart"></canvas>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <p>Auto-refresca cada 30s &mdash; Wordle Tournament ITAM</p>
+  </footer>
+
+  <script src="js/charts.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

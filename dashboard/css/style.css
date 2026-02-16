@@ -1,0 +1,544 @@
+/* ── EVA-02 Dark Theme ─────────────────────────────────────
+   Inspired by Evangelion Unit-02: red body, orange accents,
+   yellow highlights on a deep dark background.
+   ──────────────────────────────────────────────────────────── */
+
+:root {
+  --bg-body: #0a0a12;
+  --bg-card: #14142a;
+  --bg-card-alt: #1a1a32;
+  --bg-input: #1e1e38;
+  --accent-red: #c62828;
+  --accent-red-light: #e53935;
+  --accent-orange: #e65100;
+  --accent-orange-light: #ff8a65;
+  --accent-yellow: #ffd600;
+  --text-primary: #e8e8e8;
+  --text-secondary: #aaa;
+  --text-muted: #666;
+  --border: #2a2a4e;
+  --border-light: #3a3a5e;
+  --hover: rgba(198, 40, 40, 0.12);
+  --success: #4caf50;
+  --error: #e15759;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  background: var(--bg-body);
+  color: var(--text-primary);
+  line-height: 1.6;
+}
+
+/* ── Header ────────────────────────────────────────────────── */
+
+header {
+  background: linear-gradient(135deg, #8b0000 0%, var(--accent-red) 50%, var(--accent-orange) 100%);
+  color: #fff;
+  padding: 1.5rem 2rem;
+  text-align: center;
+  border-bottom: 3px solid var(--accent-yellow);
+}
+
+header h1 {
+  font-size: 1.8rem;
+  margin-bottom: 0.3rem;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.4);
+}
+
+header p {
+  font-size: 0.9rem;
+  color: rgba(255,255,255,0.8);
+}
+
+/* ── Layout ────────────────────────────────────────────────── */
+
+main {
+  max-width: 1200px;
+  margin: 2rem auto;
+  padding: 0 1rem;
+}
+
+section {
+  background: var(--bg-card);
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+  border: 1px solid var(--border);
+}
+
+h2 {
+  font-size: 1.3rem;
+  margin-bottom: 1rem;
+  color: var(--accent-orange-light);
+  border-bottom: 2px solid var(--border);
+  padding-bottom: 0.5rem;
+}
+
+h3 {
+  font-size: 1rem;
+  color: var(--accent-orange-light);
+  margin-bottom: 0.5rem;
+}
+
+/* ── Control Panel ──────────────────────────────────────────── */
+
+.control-row {
+  display: flex;
+  gap: 1.5rem;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+  align-items: flex-end;
+}
+
+.control-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.control-group-wide {
+  flex: 1;
+  min-width: 180px;
+}
+
+.control-group label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.control-group input[type="number"],
+.control-group input[type="text"] {
+  width: 120px;
+  padding: 0.4rem 0.6rem;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  font-size: 0.9rem;
+  background: var(--bg-input);
+  color: var(--text-primary);
+}
+
+.control-group-wide input[type="text"] {
+  width: 100%;
+}
+
+.control-group input:focus {
+  outline: none;
+  border-color: var(--accent-orange);
+  box-shadow: 0 0 0 2px rgba(230, 81, 0, 0.3);
+}
+
+/* ── Preset buttons (just fill form, no launch) ──────────── */
+
+.preset-buttons {
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.preset-label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-right: 0.3rem;
+}
+
+.btn {
+  padding: 0.5rem 1.2rem;
+  border: none;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.2s;
+}
+
+.btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.btn-preset {
+  background: transparent;
+  color: var(--text-secondary);
+  border: 1px solid var(--border-light);
+  padding: 0.35rem 0.9rem;
+  font-size: 0.85rem;
+}
+
+.btn-preset:hover:not(:disabled) {
+  border-color: var(--accent-orange);
+  color: var(--accent-orange-light);
+}
+
+.btn-preset.active {
+  border-color: var(--accent-yellow);
+  color: var(--accent-yellow);
+  background: rgba(255, 214, 0, 0.08);
+}
+
+/* ── Launch / Stop buttons ────────────────────────────────── */
+
+.launch-row {
+  gap: 0.8rem;
+  margin-top: 0.3rem;
+}
+
+.btn-launch {
+  background: linear-gradient(135deg, var(--accent-red) 0%, #b71c1c 100%);
+  color: #fff;
+  padding: 0.6rem 2.5rem;
+  font-size: 1rem;
+  border-radius: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  box-shadow: 0 2px 6px rgba(198, 40, 40, 0.4);
+}
+
+.btn-launch:hover:not(:disabled) {
+  background: linear-gradient(135deg, var(--accent-red-light) 0%, var(--accent-red) 100%);
+  box-shadow: 0 3px 10px rgba(198, 40, 40, 0.6);
+}
+
+.btn-stop {
+  background: var(--bg-input);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-light);
+}
+
+.btn-stop:hover:not(:disabled) {
+  background: var(--error);
+  color: #fff;
+  border-color: var(--error);
+}
+
+.time-estimate {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--accent-orange-light);
+  margin-bottom: 0.3rem;
+}
+
+/* ── Status indicator ──────────────────────────────────────── */
+
+#tournament-status {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+#status-indicator {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.status-idle #status-indicator { background: var(--text-muted); }
+.status-running #status-indicator { background: var(--accent-orange); animation: pulse 1s infinite; }
+.status-finished #status-indicator { background: var(--success); }
+.status-error #status-indicator { background: var(--error); }
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+
+/* ── Log ──────────────────────────────────────────────────── */
+
+#log-toggle {
+  margin: 0.5rem 0;
+}
+
+#log-toggle a {
+  color: var(--accent-orange-light);
+  font-size: 0.85rem;
+  text-decoration: none;
+}
+
+#log-toggle a:hover {
+  color: var(--accent-yellow);
+}
+
+#tournament-log {
+  display: none;
+  background: #0d0d18;
+  color: #ccc;
+  padding: 0.8rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  max-height: 300px;
+  overflow-y: auto;
+  white-space: pre-wrap;
+  word-break: break-all;
+  margin-top: 0.5rem;
+  border: 1px solid var(--border);
+}
+
+/* ── Tables ────────────────────────────────────────────────── */
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 1rem;
+}
+
+th, td {
+  padding: 0.6rem 1rem;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+}
+
+th {
+  background: var(--bg-card-alt);
+  font-weight: 600;
+  cursor: pointer;
+  user-select: none;
+  color: var(--accent-orange-light);
+}
+
+th:hover {
+  background: #222244;
+}
+
+tbody tr:hover {
+  background: var(--hover);
+}
+
+/* ── Rank highlights (EVA-02: gold/silver/bronze on dark) ── */
+
+tr.rank-1 td { background: rgba(255, 214, 0, 0.1); font-weight: 700; }
+tr.rank-1 td:first-child { border-left: 4px solid var(--accent-yellow); color: var(--accent-yellow); }
+
+tr.rank-2 td { background: rgba(176, 190, 197, 0.08); font-weight: 700; }
+tr.rank-2 td:first-child { border-left: 4px solid #b0bec5; color: #b0bec5; }
+
+tr.rank-3 td { background: rgba(230, 81, 0, 0.1); font-weight: 700; }
+tr.rank-3 td:first-child { border-left: 4px solid var(--accent-orange); color: var(--accent-orange); }
+
+/* ── Section header with run selector ─────────────────────── */
+
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.section-header h2 {
+  margin-bottom: 0;
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+#run-selector {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+}
+
+#run-selector label {
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+#run-dropdown {
+  padding: 0.35rem 0.5rem;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  font-size: 0.85rem;
+  max-width: 420px;
+  background: var(--bg-input);
+  color: var(--text-primary);
+}
+
+#run-dropdown:focus {
+  outline: none;
+  border-color: var(--accent-orange);
+}
+
+/* ── Scoring explanation ──────────────────────────────────── */
+
+.scoring-explanation {
+  margin-top: 1rem;
+  padding: 1rem;
+  background: var(--bg-card-alt);
+  border-radius: 6px;
+  border-left: 3px solid var(--accent-orange);
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  line-height: 1.7;
+}
+
+.scoring-explanation h3 {
+  margin-bottom: 0.4rem;
+}
+
+.scoring-explanation code {
+  background: var(--bg-input);
+  padding: 0.1rem 0.4rem;
+  border-radius: 3px;
+  font-size: 0.8rem;
+  color: var(--accent-orange-light);
+}
+
+/* ── Round tabs ────────────────────────────────────────────── */
+
+#round-tabs {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+}
+
+.round-tab {
+  padding: 0.4rem 0.8rem;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  cursor: pointer;
+  background: var(--bg-card-alt);
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+
+.round-tab:hover {
+  border-color: var(--accent-orange);
+  color: var(--accent-orange-light);
+}
+
+.round-tab.active {
+  background: var(--accent-red);
+  color: #fff;
+  border-color: var(--accent-red);
+}
+
+/* ── Comparison ────────────────────────────────────────────── */
+
+#comparison-controls {
+  margin-bottom: 1rem;
+}
+
+#comparison-controls > label {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+}
+
+#strategy-checkboxes {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-top: 0.5rem;
+}
+
+#strategy-checkboxes label {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  cursor: pointer;
+  font-size: 0.9rem;
+  color: var(--text-primary);
+}
+
+/* ── Charts ────────────────────────────────────────────────── */
+
+#round-charts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  justify-content: center;
+}
+
+.chart-container {
+  width: 250px;
+  height: 180px;
+}
+
+#comparison-chart-container {
+  max-width: 700px;
+  max-height: 350px;
+  margin: 0 auto;
+}
+
+canvas {
+  max-width: 100%;
+}
+
+/* ── Progress ──────────────────────────────────────────────── */
+
+#progress-bar-container {
+  margin-top: 0.5rem;
+}
+
+.progress-bar {
+  width: 100%;
+  height: 24px;
+  background: var(--bg-input);
+  border-radius: 12px;
+  overflow: hidden;
+  position: relative;
+  border: 1px solid var(--border);
+}
+
+.progress-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent-red), var(--accent-orange));
+  border-radius: 12px;
+  transition: width 0.5s ease;
+}
+
+.progress-bar-text {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  text-align: center;
+  line-height: 24px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+}
+
+.progress-rounds {
+  display: flex;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+  margin-top: 0.5rem;
+}
+
+.progress-round {
+  padding: 0.2rem 0.5rem;
+  border-radius: 3px;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.progress-round.done { background: rgba(76, 175, 80, 0.2); color: var(--success); }
+.progress-round.running { background: rgba(230, 81, 0, 0.2); color: var(--accent-orange-light); animation: pulse 1s infinite; }
+.progress-round.pending { background: var(--bg-input); color: var(--text-muted); }
+
+/* ── Footer ────────────────────────────────────────────────── */
+
+footer {
+  text-align: center;
+  padding: 1rem;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+}
+
+footer a {
+  color: var(--accent-orange-light);
+}

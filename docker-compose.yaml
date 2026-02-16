@@ -1,0 +1,74 @@
+services:
+  # ── Download word lists for all lengths (4, 5, 6) ──
+  download:
+    build: .
+    command: python download_words.py --all-lengths
+    volumes:
+      - ./data:/app/data
+
+  # ── Official tournament (6 canonical rounds) ──
+  tournament:
+    build: .
+    command: >
+      python tournament.py --official
+        --num-games ${NUM_GAMES:-100}
+        --game-timeout 5
+    volumes:
+      - ./results:/app/results
+      - ./data:/app/data
+      - ./estudiantes:/app/estudiantes
+
+  # ── Real evaluation tournament (for class grading) ──
+  #    All students, full corpus, 3 reps, 5% shock
+  real-tournament:
+    build: .
+    command: >
+      python tournament.py --official
+        --num-games ${NUM_GAMES:-100}
+        --repetitions ${REPS:-3}
+        --shock 0.05
+        --game-timeout 5
+    volumes:
+      - ./results:/app/results
+      - ./data:/app/data
+      - ./estudiantes:/app/estudiantes
+
+  # ── Single strategy experiment ──
+  experiment:
+    build: .
+    command: >
+      python experiment.py
+        --strategy ${STRATEGY:-Random}
+        --length ${LENGTH:-5}
+        --mode ${MODE:-uniform}
+        --num-games ${NUM_GAMES:-20}
+        --verbose
+    volumes:
+      - ./results:/app/results
+      - ./data:/app/data
+      - ./estudiantes:/app/estudiantes
+
+  # ── Team-local tournament (your strategy vs benchmarks) ──
+  team-tournament:
+    build: .
+    command: >
+      python tournament.py
+        --team ${TEAM:-_template}
+        --official
+        --num-games ${NUM_GAMES:-10}
+        --json estudiantes/${TEAM:-_template}/results/tournament_results.json
+    volumes:
+      - ./data:/app/data
+      - ./estudiantes:/app/estudiantes
+
+  # ── Dashboard with tournament management (Python server) ──
+  #    Can launch/stop tournaments from the browser
+  dashboard:
+    build: .
+    command: python dashboard/server.py --port 80
+    ports:
+      - "8080:80"
+    volumes:
+      - ./results:/app/results
+      - ./data:/app/data
+      - ./estudiantes:/app/estudiantes

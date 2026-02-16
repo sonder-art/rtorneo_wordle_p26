@@ -6,11 +6,18 @@ El framework descubre todas las estrategias, las corre en paralelo, y genera un 
 
 ---
 
-## TL;DR — Setup en 3 comandos
+## Setup
 
 ```bash
+# 1. Forkea el repo en GitHub y clona tu fork
+git clone https://github.com/<tu-usuario>/rtorneo_wordle_p26.git
+cd rtorneo_wordle_p26
+
+# 2. Instala dependencias (solo numpy y matplotlib)
 pip install -r requirements.txt
-python3 run_all.py              # descarga datos + corre torneo de prueba
+
+# 3. Descarga datos y corre un torneo de prueba
+python3 run_all.py
 ```
 
 Eso es todo. Descarga los corpus (si no existen), corre las 6 rondas oficiales con 10 juegos por ronda, e imprime el leaderboard.
@@ -19,9 +26,10 @@ Eso es todo. Descarga los corpus (si no existen), corre las 6 rondas oficiales c
 
 ## Que tienes que hacer (estudiantes)
 
-### 1. Copia el template
+### 1. Crea tu branch y copia el template
 
 ```bash
+git checkout -b mi_equipo
 cp -r estudiantes/_template estudiantes/mi_equipo
 ```
 
@@ -65,13 +73,26 @@ python3 experiment.py --strategy "MiEstrategia_mi_equipo" --length 6 --mode freq
 python3 tournament.py --team mi_equipo --official --num-games 10
 ```
 
-### 4. Entrega: abre un PR
+### 4. Entrega: abre un Pull Request
 
 ```bash
 git add estudiantes/mi_equipo/strategy.py
 git commit -m "add strategy mi_equipo"
-git push   # abre PR en GitHub
+git push origin mi_equipo
 ```
+
+Luego ve a GitHub y abre un **Pull Request** de tu branch `mi_equipo` hacia `main`.
+
+**Que debe tener tu PR:**
+- El archivo `estudiantes/<tu_equipo>/strategy.py` — esto es lo **unico obligatorio**
+- Opcionalmente puedes incluir otros archivos en tu directorio (notebooks, scripts, datos) pero no seran evaluados
+
+**Que NO debes incluir en tu PR:**
+- Cambios a archivos fuera de `estudiantes/<tu_equipo>/` (no toques `tournament.py`, `wordle_env.py`, etc.)
+- Archivos grandes (`.csv`, `.pkl`, `.npy`, modelos) — el `.gitignore` ya los bloquea
+- Resultados (`results/`) — tambien bloqueados por `.gitignore`
+
+> **Tip:** Si solo quieres verificar que no vas a subir algo indebido, corre `git status` antes de hacer commit. Solo deberia aparecer tu `strategy.py` (y opcionalmente otros archivos de tu directorio).
 
 ---
 
@@ -273,25 +294,68 @@ Usa `feedback()` y `filter_candidates()` — estan optimizadas y son las mismas 
 
 ## Dashboard
 
+El dashboard es una interfaz web para lanzar torneos, ver resultados, y comparar estrategias. Se abre en `http://localhost:8080`.
+
+### Iniciar el dashboard
+
 ```bash
-# Lanzar dashboard (abre http://localhost:8080)
+# Solo dashboard (sin correr torneo)
 python3 run_all.py --dashboard-only
 
-# Torneo + dashboard al terminar
+# Torneo por terminal + dashboard al terminar
 python3 run_all.py --num-games 50 --dashboard
 
 # Via Docker
 docker compose up dashboard
 ```
 
-El dashboard incluye:
-- **Panel de control** para lanzar y detener torneos desde el navegador
-- **Presets** (Rapido, Oficial, Real) que rellenan el formulario — lanzas cuando quieras
-- **Nombre opcional** para cada torneo
-- **Historial de torneos** — cada ejecucion se guarda automaticamente; dropdown para cargar resultados anteriores
-- **Leaderboard** con medallas para el top 3, explicacion del sistema de puntuacion
-- **Detalle por ronda**, distribucion de intentos, y comparacion entre estrategias
-- **Barra de progreso** en tiempo real durante la ejecucion
+### Como usar el dashboard
+
+#### 1. Panel de Control — configurar y lanzar torneos
+
+En la parte superior hay un formulario con 3 campos:
+- **Juegos por ronda** — cuantas palabras secretas se prueban por ronda (mas = mas preciso, mas lento)
+- **Repeticiones** — cuantas veces se repite cada ronda (con semillas distintas)
+- **Shock (%)** — perturbacion aplicada a las probabilidades en modo `frequency`
+
+Debajo hay 3 botones de **presets** que rellenan el formulario con configuraciones predefinidas:
+
+| Preset | Juegos | Reps | Shock | Uso |
+|--------|--------|------|-------|-----|
+| **Rapido** | 10 | 1 | 0% | Verificar que todo funciona (~30s) |
+| **Oficial** | 100 | 1 | 0% | Prueba seria para desarrollo |
+| **Real** | 100 | 3 | 5% | Evaluacion final del curso |
+
+Los presets **solo rellenan** los campos — no lanzan el torneo. Puedes ajustar los valores antes de lanzar.
+
+Opcionalmente puedes escribir un **nombre** para identificar el torneo (ej: "Torneo Final P26").
+
+Cuando estes listo, haz click en **Lanzar Torneo**. Veras:
+- Una **barra de progreso** que muestra cuantas rondas van completadas
+- Los nombres de las 6 rondas (4/5/6 letras × uniform/frequency) con estado: pendiente, en ejecucion, o completada
+- Un **log en vivo** (click en "Ver log del torneo") con la salida del proceso
+
+Para cancelar un torneo en ejecucion, click en **Detener**.
+
+#### 2. Leaderboard — ranking general
+
+Muestra **todas** las estrategias ordenadas por puntos totales (Borda Count). El top 3 se destaca con medallas. Las columnas son clickeables para ordenar por cualquier campo.
+
+Debajo del leaderboard hay una **explicacion del sistema de puntuacion**: como se calculan los puntos, como se manejan empates, y que pasa con timeouts.
+
+#### 3. Historial de torneos — comparar ejecuciones
+
+Cada torneo se guarda automaticamente en `results/runs/<timestamp>/`. En el dropdown **"Torneo"** (junto al titulo del leaderboard) puedes seleccionar cualquier torneo anterior para ver sus resultados. El dropdown muestra el nombre (si lo pusiste), la configuracion (juegos, reps, shock), y el numero de estrategias.
+
+#### 4. Detalle por Ronda
+
+Tabs para cada una de las 6 rondas. Al seleccionar una ronda ves:
+- **Tabla** con estadisticas por estrategia: juegos, resueltos, % resuelto, media/mediana/max de intentos, timeouts
+- **Histogramas** de distribucion de intentos por estrategia
+
+#### 5. Comparacion de Estrategias
+
+Checkboxes para seleccionar estrategias y un **grafico de barras agrupadas** que compara la distribucion de intentos agregada de todas las rondas. Util para ver diferencias entre estrategias de un vistazo.
 
 ---
 

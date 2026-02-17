@@ -16,9 +16,9 @@ const MEDALS = ['', '\u{1F947}', '\u{1F948}', '\u{1F949}'];
 
 // Preset configurations (only fill form, don't launch)
 const PRESETS = {
-  quick:    { num_games: 10,  repetitions: 1, shock: 0 },
-  official: { num_games: 100, repetitions: 1, shock: 0 },
-  real:     { num_games: 100, repetitions: 3, shock: 0.05 },
+  quick:    { num_games: 10,  repetitions: 1, shock: 0,    corpus: 'mini' },
+  official: { num_games: 100, repetitions: 1, shock: 0,    corpus: 'full' },
+  real:     { num_games: 100, repetitions: 3, shock: 0.05, corpus: 'full' },
 };
 
 // ── Bootstrap ──────────────────────────────────────────────
@@ -336,6 +336,7 @@ function selectPreset(preset) {
   document.getElementById('num-games').value = cfg.num_games;
   document.getElementById('repetitions').value = cfg.repetitions;
   document.getElementById('shock').value = Math.round((cfg.shock || 0) * 100);
+  document.getElementById('corpus-mode').value = cfg.corpus || 'full';
 
   // Highlight active preset
   document.querySelectorAll('.btn-preset').forEach(b => b.classList.remove('active'));
@@ -354,6 +355,7 @@ function launchTournament() {
     num_games: parseInt(document.getElementById('num-games').value) || 100,
     repetitions: parseInt(document.getElementById('repetitions').value) || 1,
     shock: (parseInt(document.getElementById('shock').value) || 0) / 100,
+    corpus: document.getElementById('corpus-mode').value || 'full',
   };
 
   // Optional tournament name

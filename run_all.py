@@ -86,6 +86,9 @@ examples:
                         help="Random seed for reproducibility")
     parser.add_argument("--team", type=str, default=None,
                         help="Only run this team + benchmarks")
+    parser.add_argument("--corpus", choices=["mini", "full"], default=None,
+                        help="Corpus size: mini (~50 words, fast debug) or full (~20k words) "
+                             "(default: full)")
     args = parser.parse_args()
 
     # ── Step 1: Download data if missing ──────────────────────────
@@ -137,6 +140,9 @@ examples:
 
     if args.team:
         cmd += ["--team", args.team]
+
+    corpus = args.corpus or "full"
+    cmd += ["--corpus", corpus]
 
     # JSON output: team runs get explicit path, normal runs auto-generate
     # results/runs/<timestamp>/ directories (+ results/latest.json)

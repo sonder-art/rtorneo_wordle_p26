@@ -1,33 +1,49 @@
-"""Entropy strategy: maximise expected information gain per guess."""
+"""Entropy strategy: maximise expected information gain per guess.
+
+If precomputed decision trees exist (from precompute_trees.py), uses
+instant tree lookups for the first few guesses. Falls back to live
+entropy computation when the tree doesn't cover a position (typically
+when candidates are small enough for it to be instant).
+"""
 
 from __future__ import annotations
 
 import math
+import pickle
 import random
 from collections import defaultdict
+from pathlib import Path
 
 from strategy import Strategy, GameConfig
 from wordle_env import feedback, filter_candidates
 
-# Performance caps to stay within 5 s/game on 20k-word vocabularies
+# Performance caps for live fallback computation
 _MAX_GUESS_POOL = 200      # max guesses to evaluate
 _MAX_EVAL_CANDIDATES = 500  # max candidates to compute feedback against
+
+_TREE_DIR = Path(__file__).resolve().parent.parent / "data" / "trees"
 
 
 class EntropyStrategy(Strategy):
     """Select the guess that maximises Shannon entropy of the feedback partition.
 
-    For each candidate guess *g*, the remaining candidates are partitioned by
-    the feedback pattern they would produce.  The guess with the highest
-    entropy H = -sum(p_i * log2(p_i)) is chosen because it maximises expected
-    information gain.
-
-    Performance budget (5 s/game with 20k-word vocabularies):
-      - |candidates| <= 2: return immediately.
-      - Guess pool capped at 200 words.
-      - Candidate evaluation set capped at 500 words.
-      - After first guess, candidates typically drop to <500 (exact).
+    Uses precomputed decision trees (if available) for instant lookups
+    on the first few guesses, then falls back to live entropy computation
+    once candidates are small enough.
     """
+
+    def __init__(self):
+        self._trees: dict[tuple[int, str], dict] = {}
+        if _TREE_DIR.is_dir():
+            for wl in [4, 5, 6]:
+                for mode in ["uniform", "frequency"]:
+                    tree_path = _TREE_DIR / f"tree_{wl}_{mode}.pkl"
+                    if tree_path.exists():
+                        try:
+                            with open(tree_path, "rb") as f:
+                                self._trees[(wl, mode)] = pickle.load(f)
+                        except Exception:
+                            pass
 
     @property
     def name(self) -> str:
@@ -37,9 +53,16 @@ class EntropyStrategy(Strategy):
         self._vocab = list(config.vocabulary)
         self._config = config
         self._rng = random.Random(42)
+        self._tree = self._trees.get(
+            (config.word_length, config.mode), {})
 
     def guess(self, history: list[tuple[str, tuple[int, ...]]]) -> str:
-        # Filter candidates consistent with all feedback so far
+        # Try precomputed tree first (instant lookup)
+        path = tuple(pat for _, pat in history)
+        if path in self._tree:
+            return self._tree[path]
+
+        # Fallback: live entropy computation
         candidates = self._vocab
         for g, pat in history:
             candidates = filter_candidates(candidates, g, pat)
@@ -68,20 +91,17 @@ class EntropyStrategy(Strategy):
         n = len(eval_candidates)
 
         for g in guess_pool:
-            # Partition eval_candidates by feedback pattern
             partition: dict[int, int] = defaultdict(int)
             for c in eval_candidates:
                 pat = feedback(c, g)
                 key = _encode_pattern(pat)
                 partition[key] += 1
 
-            # Compute entropy
             ent = 0.0
             for count in partition.values():
                 p = count / n
                 ent -= p * math.log2(p)
 
-            # Prefer candidates over non-candidates on ties
             is_candidate = g in candidate_set
             if ent > best_entropy or (
                 ent == best_entropy and is_candidate and best_guess not in candidate_set

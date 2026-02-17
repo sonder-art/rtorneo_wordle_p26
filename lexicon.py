@@ -24,8 +24,17 @@ _DIR = Path(__file__).resolve().parent
 
 
 def _strip_accents(text: str) -> str:
-    nfkd = unicodedata.normalize("NFKD", text)
-    return "".join(ch for ch in nfkd if unicodedata.category(ch) != "Mn")
+    """Strip accent marks but preserve ñ."""
+    result = []
+    for ch in text:
+        if ch == "ñ":
+            result.append("ñ")
+        else:
+            decomposed = unicodedata.normalize("NFD", ch)
+            result.append(
+                "".join(c for c in decomposed if unicodedata.category(c) != "Mn")
+            )
+    return "".join(result)
 
 
 # ------------------------------------------------------------------
@@ -111,7 +120,7 @@ def perturb_probabilities(
 
 def _load_txt(path: Path, word_length: int) -> tuple[list[str], dict[str, int]]:
     """Load plain-text word list (one word per line). Counts are all 1."""
-    pattern = re.compile(rf"^[a-z]{{{word_length}}}$")
+    pattern = re.compile(rf"^[a-zñ]{{{word_length}}}$")
     seen: set[str] = set()
     words: list[str] = []
     for raw in path.read_text(encoding="utf-8").splitlines():
@@ -128,7 +137,7 @@ def _load_txt(path: Path, word_length: int) -> tuple[list[str], dict[str, int]]:
 
 def _load_csv(path: Path, word_length: int) -> tuple[list[str], dict[str, int]]:
     """Load CSV with ``word,count`` header."""
-    pattern = re.compile(rf"^[a-z]{{{word_length}}}$")
+    pattern = re.compile(rf"^[a-zñ]{{{word_length}}}$")
     seen: set[str] = set()
     words: list[str] = []
     counts: dict[str, int] = {}

@@ -91,6 +91,9 @@ def _launch_tournament(config: dict) -> dict:
     if name:
         cmd += ["--name", str(name)]
 
+    corpus = config.get("corpus", "full")
+    cmd += ["--corpus", corpus]
+
     # Let tournament.py handle run directory creation (no --json = auto run dir)
     # We don't pass --json so it uses the default results/runs/<id>/ path
 

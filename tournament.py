@@ -561,6 +561,8 @@ examples:
     parser.add_argument("--words", type=str, default=None, help="Path to word list (.txt or .csv)")
     parser.add_argument("--length", type=int, default=5, help="Word length (default: 5)")
     parser.add_argument("--max-guesses", type=int, default=6, help="Max guesses per game (default: 6)")
+    parser.add_argument("--corpus", choices=["mini", "full"], default="full",
+                        help="Corpus size: mini (~50 words, fast debug) or full (~20k words) (default: full)")
     parser.add_argument("--num-games", type=int, default=None, help="Limit number of secret words to test")
     parser.add_argument("--seed", type=int, default=None,
                         help="Random seed (default: random for official, 42 otherwise)")
@@ -619,7 +621,14 @@ def _run_custom(args, out_dir: Path) -> None:
         print(f"  MODE: {mode}  |  LENGTH: {args.length}")
         print(f"{'='*60}\n")
 
-        lex = load_lexicon(path=args.words, word_length=args.length, mode=mode)
+        words_path = args.words
+        if words_path is None:
+            data_dir = Path(__file__).resolve().parent / "data"
+            if args.corpus == "mini":
+                words_path = str(data_dir / f"mini_spanish_{args.length}.txt")
+            else:
+                words_path = str(data_dir / f"spanish_{args.length}letter.csv")
+        lex = load_lexicon(path=words_path, word_length=args.length, mode=mode)
         probs = dict(lex.probs)
         if args.shock > 0 and mode == "frequency":
             probs = perturb_probabilities(probs, noise_scale=args.shock, seed=seed)
@@ -715,7 +724,14 @@ def _run_official(args, out_dir: Path) -> None:
                   + (f"  (rep {rep})" if args.repetitions > 1 else ""))
             print(f"{'='*60}\n")
 
-            lex = load_lexicon(path=args.words, word_length=wl, mode=mode)
+            words_path = args.words
+            if words_path is None:
+                data_dir = Path(__file__).resolve().parent / "data"
+                if args.corpus == "mini":
+                    words_path = str(data_dir / f"mini_spanish_{wl}.txt")
+                else:
+                    words_path = str(data_dir / f"spanish_{wl}letter.csv")
+            lex = load_lexicon(path=words_path, word_length=wl, mode=mode)
             probs = dict(lex.probs)
             if args.shock > 0 and mode == "frequency":
                 probs = perturb_probabilities(probs, noise_scale=args.shock, seed=round_seed)
@@ -782,6 +798,7 @@ def _run_official(args, out_dir: Path) -> None:
         "shock_scale": args.shock,
         "game_timeout": args.game_timeout,
         "max_guesses": args.max_guesses,
+        "corpus": args.corpus,
         "rounds": [{"word_length": r["word_length"], "mode": r["mode"]} for r in CANONICAL_ROUNDS],
     }
     data = build_tournament_json(all_round_summaries, leaderboard, config)

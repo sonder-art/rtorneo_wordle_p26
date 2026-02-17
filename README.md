@@ -63,13 +63,16 @@ class MiEstrategia(Strategy):
 ### 3. Prueba localmente
 
 ```bash
-# Prueba rapida (verbose = ves cada intento)
+# Prueba rapida con corpus mini (verbose = ves cada intento)
 python3 experiment.py --strategy "MiEstrategia_mi_equipo" --num-games 10 --verbose
 
 # Probar 6 letras, modo frequency
 python3 experiment.py --strategy "MiEstrategia_mi_equipo" --length 6 --mode frequency --verbose
 
-# Torneo local: tu estrategia vs los 3 benchmarks (Random, MaxProb, Entropy)
+# Torneo local rapido con corpus mini (~50 palabras, debug)
+python3 tournament.py --team mi_equipo --official --num-games 10 --corpus mini
+
+# Torneo local con corpus completo (~20k palabras, como en evaluacion real)
 python3 tournament.py --team mi_equipo --official --num-games 10
 ```
 
@@ -194,6 +197,45 @@ Al final del torneo se muestra el **leaderboard completo** con los **top 3 desta
 
 ---
 
+## Errores comunes y como evitarlos
+
+### Tu estrategia no aparece en el torneo
+- Verifica que tu archivo se llame exactamente `strategy.py` y este en `estudiantes/<tu_equipo>/strategy.py`.
+- Tu clase debe heredar de `Strategy` (importada de `strategy.py` en la raiz).
+- El directorio de tu equipo **no** debe empezar con `_` (esos se ignoran).
+
+### Timeout (5 segundos)
+- El timeout es **estricto**: cubre `begin_game()` + todos los `guess()` del juego. Si tu `begin_game()` tarda 4 segundos, solo te queda 1 segundo para los 6 intentos.
+- El corpus de 5 letras tiene ~20,000 palabras. Iterar sobre todas las combinaciones de (guess, candidato) es O(n^2) y puede ser lento. Usa sampling o heuristicas para vocabularios grandes.
+- Corre `python3 experiment.py --strategy "TuNombre" --length 5 --num-games 5 --verbose` para verificar tiempos.
+
+### ImportError o ModuleNotFoundError
+- Solo puedes usar `numpy` + la libreria estandar de Python. No instales ni importes nada mas (`scipy`, `pandas`, `sklearn`, etc.).
+- Puedes importar `from strategy import Strategy, GameConfig` y `from wordle_env import feedback, filter_candidates` — estos son parte del framework.
+
+### Tu estrategia funciona para 5 letras pero falla para 4 o 6
+- El torneo tiene **6 rondas** con palabras de 4, 5 y 6 letras. Tu estrategia debe funcionar para todas.
+- No hardcodees longitudes de palabra. Usa `config.word_length` para adaptar tu logica.
+- Prueba las 6 configuraciones antes de entregar:
+  ```bash
+  for L in 4 5 6; do
+    for M in uniform frequency; do
+      python3 experiment.py --strategy "TuNombre" --length $L --mode $M --num-games 5
+    done
+  done
+  ```
+
+### El PR incluye archivos que no deberia
+- El `.gitignore` ya bloquea archivos comunes (`.csv`, `.pkl`, `.npy`, `.ipynb`, imagenes, `results/`).
+- Antes de hacer commit, corre `git status` y revisa que solo esten tus archivos de `estudiantes/<tu_equipo>/`.
+- Usa `git add estudiantes/<tu_equipo>/strategy.py` en vez de `git add .` para evitar sorpresas.
+
+### "No candidates" o tu estrategia devuelve basura
+- Si `filter_candidates()` devuelve una lista vacia, significa que tu feedback acumulado es inconsistente con todos los candidatos. Asegurate de guardar un fallback (ej: la lista original de vocabulario).
+- `guess()` debe devolver un string en minusculas de longitud `config.word_length`. Cualquier otra cosa causa error.
+
+---
+
 ## Benchmarks incluidos
 
 Tu estrategia compite contra estos 3 benchmarks:
@@ -216,7 +258,10 @@ Si tu estrategia no le gana a Random, algo anda mal.
 # Prueba rapida (descarga datos + torneo con 10 juegos/ronda)
 python3 run_all.py
 
-# Torneo mas serio (100 juegos/ronda)
+# Debug rapido con corpus mini (~50 palabras)
+python3 run_all.py --corpus mini
+
+# Torneo mas serio con corpus completo (~20k palabras)
 python3 run_all.py --num-games 100
 
 # Solo tu equipo vs benchmarks
@@ -245,12 +290,18 @@ docker compose up real-tournament
 ### Torneo (granular)
 
 ```bash
+# Debug rapido con corpus mini (~50 palabras por longitud)
+python3 tournament.py --official --corpus mini --num-games 10
+
+# Torneo real con corpus completo (~20k palabras por longitud)
 python3 tournament.py --official --num-games 100
 python3 tournament.py --official --repetitions 5 --num-games 100
 python3 tournament.py --official --shock 0.05 --num-games 100
 python3 tournament.py --official --name "Torneo Final" --num-games 100
 python3 tournament.py --team mi_equipo --official --num-games 50
 ```
+
+> **Nota:** `--corpus mini` usa los archivos `data/mini_spanish_{4,5,6}.txt` (~50 palabras) y es para **debug/testing rapido**. `--corpus full` (default) usa `data/spanish_{4,5,6}letter.csv` (~20k palabras) y es el que se usa en la **evaluacion oficial del torneo**.
 
 ### Experimento individual
 
@@ -320,11 +371,11 @@ En la parte superior hay un formulario con 3 campos:
 
 Debajo hay 3 botones de **presets** que rellenan el formulario con configuraciones predefinidas:
 
-| Preset | Juegos | Reps | Shock | Uso |
-|--------|--------|------|-------|-----|
-| **Rapido** | 10 | 1 | 0% | Verificar que todo funciona (~30s) |
-| **Oficial** | 100 | 1 | 0% | Prueba seria para desarrollo |
-| **Real** | 100 | 3 | 5% | Evaluacion final del curso |
+| Preset | Juegos | Reps | Shock | Corpus | Uso |
+|--------|--------|------|-------|--------|-----|
+| **Rapido** | 10 | 1 | 0% | Mini (~50 palabras) | Debug/testing rapido (~30s) |
+| **Oficial** | 100 | 1 | 0% | Completo (~20k palabras) | Prueba seria para desarrollo |
+| **Real** | 100 | 3 | 5% | Completo (~20k palabras) | Evaluacion final del curso |
 
 Los presets **solo rellenan** los campos — no lanzan el torneo. Puedes ajustar los valores antes de lanzar.
 

@@ -87,7 +87,7 @@ examples:
     parser.add_argument("--team", type=str, default=None,
                         help="Only run this team + benchmarks")
     parser.add_argument("--corpus", choices=["mini", "full"], default=None,
-                        help="Corpus size: mini (~50 words, fast debug) or full (~20k words) "
+                        help="Corpus size: mini (~50 words, fast debug) or full (~2k-6k words) "
                              "(default: full)")
     args = parser.parse_args()
 

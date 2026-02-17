@@ -1,7 +1,10 @@
-# Downloaded corpus files (large, regenerated via download_words.py)
+# Downloaded corpus files (regenerated via download_words.py)
 .cache/
 spanish_*.csv
 spanish_*.txt
+
+# Precomputed decision trees (regenerated via precompute_trees.py)
+trees/
 
 # Keep mini test corpora (small, committed)
 !mini_spanish_*.txt

@@ -15,7 +15,7 @@ El algoritmo de retroalimentacion utiliza un enfoque de dos pasadas: primero se 
 
 ## Formato del Torneo
 
-**6 rondas canonicas:** palabras de {4, 5, 6} letras x modos {uniform, frequency}. El torneo oficial usa el corpus completo (~20k palabras por longitud). El corpus mini (~50 palabras) esta disponible con `--corpus mini` para debug/testing rapido.
+**6 rondas canonicas:** palabras de {4, 5, 6} letras x modos {uniform, frequency}. El torneo oficial usa el corpus completo (~2k-6k palabras reales por longitud, filtradas por diccionario Hunspell). El corpus mini (~50 palabras) esta disponible con `--corpus mini` para debug/testing rapido.
 
 **Puntuacion:** En cada ronda, las estrategias se clasifican por el promedio de intentos (menor es mejor). El 1er lugar obtiene N puntos (N = total de estrategias), el 2do obtiene N-1, etc. Los empates reciben el promedio de puntos. Los puntos se suman a lo largo de las 6 rondas.
 

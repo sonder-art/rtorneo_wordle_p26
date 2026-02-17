@@ -64,7 +64,7 @@ python3 experiment.py --strategy "TuNombre_equipo" --length 6 --mode frequency -
 # Debug rapido con corpus mini (~50 palabras)
 python3 tournament.py --team nombre_de_tu_equipo --official --num-games 10 --corpus mini
 
-# Torneo con corpus completo (~20k palabras, como en evaluacion real)
+# Torneo con corpus completo (~2k-6k palabras, como en evaluacion real)
 python3 tournament.py --team nombre_de_tu_equipo --official --num-games 10
 
 # O usa run_all.py (descarga datos si es necesario tambien)

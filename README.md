@@ -72,7 +72,7 @@ python3 experiment.py --strategy "MiEstrategia_mi_equipo" --length 6 --mode freq
 # Torneo local rapido con corpus mini (~50 palabras, debug)
 python3 tournament.py --team mi_equipo --official --num-games 10 --corpus mini
 
-# Torneo local con corpus completo (~20k palabras, como en evaluacion real)
+# Torneo local con corpus completo (~2k-6k palabras, como en evaluacion real)
 python3 tournament.py --team mi_equipo --official --num-games 10
 ```
 
@@ -206,7 +206,7 @@ Al final del torneo se muestra el **leaderboard completo** con los **top 3 desta
 
 ### Timeout (5 segundos)
 - El timeout es **estricto**: cubre `begin_game()` + todos los `guess()` del juego. Si tu `begin_game()` tarda 4 segundos, solo te queda 1 segundo para los 6 intentos.
-- El corpus de 5 letras tiene ~20,000 palabras. Iterar sobre todas las combinaciones de (guess, candidato) es O(n^2) y puede ser lento. Usa sampling o heuristicas para vocabularios grandes.
+- El corpus de 5 letras tiene ~4,500 palabras. Iterar sobre todas las combinaciones de (guess, candidato) es O(n^2) y puede ser lento. Usa sampling o heuristicas para vocabularios grandes.
 - Corre `python3 experiment.py --strategy "TuNombre" --length 5 --num-games 5 --verbose` para verificar tiempos.
 
 ### ImportError o ModuleNotFoundError
@@ -261,7 +261,7 @@ python3 run_all.py
 # Debug rapido con corpus mini (~50 palabras)
 python3 run_all.py --corpus mini
 
-# Torneo mas serio con corpus completo (~20k palabras)
+# Torneo mas serio con corpus completo (~2k-6k palabras)
 python3 run_all.py --num-games 100
 
 # Solo tu equipo vs benchmarks
@@ -293,7 +293,7 @@ docker compose up real-tournament
 # Debug rapido con corpus mini (~50 palabras por longitud)
 python3 tournament.py --official --corpus mini --num-games 10
 
-# Torneo real con corpus completo (~20k palabras por longitud)
+# Torneo real con corpus completo (~2k-6k palabras por longitud)
 python3 tournament.py --official --num-games 100
 python3 tournament.py --official --repetitions 5 --num-games 100
 python3 tournament.py --official --shock 0.05 --num-games 100
@@ -301,7 +301,7 @@ python3 tournament.py --official --name "Torneo Final" --num-games 100
 python3 tournament.py --team mi_equipo --official --num-games 50
 ```
 
-> **Nota:** `--corpus mini` usa los archivos `data/mini_spanish_{4,5,6}.txt` (~50 palabras) y es para **debug/testing rapido**. `--corpus full` (default) usa `data/spanish_{4,5,6}letter.csv` (~20k palabras) y es el que se usa en la **evaluacion oficial del torneo**.
+> **Nota:** `--corpus mini` usa los archivos `data/mini_spanish_{4,5,6}.txt` (~50 palabras) y es para **debug/testing rapido**. `--corpus full` (default) usa `data/spanish_{4,5,6}letter.csv` (~2k-6k palabras reales filtradas por diccionario Hunspell) y es el que se usa en la **evaluacion oficial del torneo**.
 
 ### Experimento individual
 
@@ -374,8 +374,8 @@ Debajo hay 3 botones de **presets** que rellenan el formulario con configuracion
 | Preset | Juegos | Reps | Shock | Corpus | Uso |
 |--------|--------|------|-------|--------|-----|
 | **Rapido** | 10 | 1 | 0% | Mini (~50 palabras) | Debug/testing rapido (~30s) |
-| **Oficial** | 100 | 1 | 0% | Completo (~20k palabras) | Prueba seria para desarrollo |
-| **Real** | 100 | 3 | 5% | Completo (~20k palabras) | Evaluacion final del curso |
+| **Oficial** | 100 | 1 | 0% | Completo (~2k-6k palabras) | Prueba seria para desarrollo |
+| **Real** | 100 | 3 | 5% | Completo (~2k-6k palabras) | Evaluacion final del curso |
 
 Los presets **solo rellenan** los campos — no lanzan el torneo. Puedes ajustar los valores antes de lanzar.
 
@@ -437,7 +437,7 @@ rtorneo_wordle_p26/
 ├── lexicon.py            # Carga de palabras + modos uniform/frequency
 ├── tournament.py         # Torneo paralelo (oficial y custom)
 ├── experiment.py         # Pruebas individuales con output detallado
-├── download_words.py     # Descarga corpus desde OpenSLR
+├── download_words.py     # Descarga corpus (OpenSLR + filtro Hunspell)
 ├── strategies/           # Benchmarks: Random, MaxProb, Entropy
 ├── estudiantes/          # <-- AQUI VA TU ESTRATEGIA
 │   ├── _template/        #     Template para copiar

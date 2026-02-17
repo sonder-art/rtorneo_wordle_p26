@@ -562,7 +562,7 @@ examples:
     parser.add_argument("--length", type=int, default=5, help="Word length (default: 5)")
     parser.add_argument("--max-guesses", type=int, default=6, help="Max guesses per game (default: 6)")
     parser.add_argument("--corpus", choices=["mini", "full"], default="full",
-                        help="Corpus size: mini (~50 words, fast debug) or full (~20k words) (default: full)")
+                        help="Corpus size: mini (~50 words, fast debug) or full (~2k-6k words) (default: full)")
     parser.add_argument("--num-games", type=int, default=None, help="Limit number of secret words to test")
     parser.add_argument("--seed", type=int, default=None,
                         help="Random seed (default: random for official, 42 otherwise)")

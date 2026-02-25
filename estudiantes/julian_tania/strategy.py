@@ -5,18 +5,20 @@ in the ``guess`` method.
 """
 
 from __future__ import annotations
-
+import numpy as np
+import random
+from collections import defaultdict
 from strategy import Strategy, GameConfig
 from wordle_env import feedback, filter_candidates
 
 
 class MyStrategy(Strategy):
-    """Example strategy — replace with your own logic."""
+    """Nuestra estrategia será híbrida, basada en la Entropía (Numpy) y Score Esperado (W.5+W.6)."""
 
     @property
     def name(self) -> str:
         # Convention: "StrategyName_teamname"
-        return "MyStrategy_teamname"  # <-- CHANGE THIS
+        return "EntropyMaster_julian_tania"  # <-- CHANGE THIS
 
     def begin_game(self, config: GameConfig) -> None:
         """Called once at the start of each game.
@@ -31,6 +33,16 @@ class MyStrategy(Strategy):
         """
         self._vocab = list(config.vocabulary)
         self._config = config
+
+        # PRECOMPUTACIÓN: Las mejores aperturas para cada variante (basado en entropía y score esperado)
+        self._openers = {
+            (4, "uniform"): "roia",
+            (4, "frequency"): "cora",
+            (5, "uniform"): "careo",
+            (5, "frequency"): "careo",
+            (6, "uniform"): "careto",
+            (6, "frequency"): "cerito",
+        }
 
     def guess(self, history: list[tuple[str, tuple[int, ...]]]) -> str:
         """Return the next guess.

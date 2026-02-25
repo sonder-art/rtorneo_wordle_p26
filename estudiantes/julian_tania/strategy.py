@@ -34,7 +34,7 @@ class MyStrategy(Strategy):
         self._vocab = list(config.vocabulary)
         self._config = config
 
-        # PRECOMPUTACIÓN: Las mejores aperturas para cada variante (basado en entropía y score esperado)
+        # Openers pre-computados: Las mejores aperturas para cada variante del juego (uniform o frecuency, longitud 4, 5 o 6)
         self._openers = {
             (4, "uniform"): "roia",
             (4, "frequency"): "cora",
@@ -81,4 +81,52 @@ class MyStrategy(Strategy):
         #   - feedback(secret, guess): compute feedback pattern
         #   - filter_candidates(words, guess, pattern): filter words
         # -------------------------------------------------------
-        return candidates[0]
+
+        # Caso de un solo candidato restante por si acaso
+        if len(candidates) == 1:
+            return candidates[0]
+        
+        # Si es el turno 1: usamos el opener precalculado
+        if not history:
+            key = (self._config.word_length, self._config.mode)
+            return self._openers.get(key, self._vocab[0])
+        
+        # Si estamos en el turno 5 o 6: usamos score esperado o máxima probabilidad
+        # Apagamos la entropía
+        if len(candidates) <= 10 or len(history) >= 4:
+            # Ordenamos de mayor a menor probabilidad y disparamos a la primera
+            candidates.sort(key=lambda w: self._config.probabilities.get(w, 0), reverse=True)
+            return candidates[0]
+        
+        # Si estamos en los primeros turnos: usamos entropía
+        guesses_to_test = candidates
+        # Si hay más de 150 palabras por testear, tomamos un sample de 150 palabras para ahorrar tiempo de cálculo
+        if len(candidates) > 150:
+            guesses_to_test = random.sample(candidates, 150)
+        
+        best_guess = candidates[0]
+        max_entropy = -1.0
+
+        # Suma para normalizar probabilidades
+        total_prob = sum(self._config.probabilities.get(c, 1.0) for c in candidates)
+        if total_prob == 0: total_prob = 1.0
+
+        # Calculamos la entropía de cada posible guess sobre los candidatos restantes
+        for g in guesses_to_test:
+            pattern_probs = defaultdict(float)
+            
+            # Simulación contra posibles respuestas
+            for c in candidates:
+                pat = feedback(c, g)
+                prob_c = self._config.probabilities.get(c, 1.0) / total_prob
+                pattern_probs[pat] += prob_c
+            
+            # Ecuación de Shannon con NumPy
+            p_array = np.array(list(pattern_probs.values()))
+            entropy = -np.sum(p_array * np.log2(p_array + 1e-9))
+            
+            if entropy > max_entropy:
+                max_entropy = entropy
+                best_guess = g
+
+        return best_guess

@@ -64,8 +64,8 @@ class MyStrategy(Strategy):
         """
         # Filter candidates consistent with all feedback so far
         candidates = self._vocab
-        for g, pat in history:
-            candidates = filter_candidates(candidates, g, pat)
+        for past_guess, pattern in history:
+            candidates = filter_candidates(candidates, past_guess, pattern)
 
         if not candidates:
             return self._vocab[0]
@@ -91,42 +91,53 @@ class MyStrategy(Strategy):
             key = (self._config.word_length, self._config.mode)
             return self._openers.get(key, self._vocab[0])
         
-        # Si estamos en el turno 5 o 6: usamos score esperado o máxima probabilidad
-        # Apagamos la entropía
-        if len(candidates) <= 10 or len(history) >= 4:
-            # Ordenamos de mayor a menor probabilidad y disparamos a la primera
-            candidates.sort(key=lambda w: self._config.probabilities.get(w, 0), reverse=True)
+        # Si estamos en el último turno (6) o quedan 2 palabras o menos, disparamos a la más probable
+        # Utilizamos entropía
+        if len(candidates) <= 2 or len(history) >= 5:
+            # Ordenamos de mayor a menor probabilidad y devolvemos la más probable
+            candidates.sort(key=lambda word: self._config.probabilities.get(word, 0), reverse=True)
             return candidates[0]
         
-        # Si estamos en los primeros turnos: usamos entropía
-        guesses_to_test = candidates
-        # Si hay más de 150 palabras por testear, tomamos un sample de 150 palabras para ahorrar tiempo de cálculo
-        if len(candidates) > 150:
-            guesses_to_test = random.sample(candidates, 150)
-        
+        # Si tenemos de 3 a 15 opciones posibles, inyectamos todo el vocabulario
+        # Gastamos un intento en un guess para reducir el espacio de búsqueda
+        if 2 < len(candidates) <= 15:
+            vocab_sample = random.sample(self._vocab, min(200, len(self._vocab)))
+            words_to_test = list(set(candidates + vocab_sample))
+
+        # Si hay más de 150 palabras, tomamos un sample para ahorrar tiempo
+        elif len(candidates) > 150:
+            words_to_test = random.sample(candidates, 150)
+        else:
+            words_to_test = candidates
+
         best_guess = candidates[0]
-        max_entropy = -1.0
+        max_score = -1.0
 
         # Suma para normalizar probabilidades
-        total_prob = sum(self._config.probabilities.get(c, 1.0) for c in candidates)
-        if total_prob == 0: total_prob = 1.0
+        total_probability = sum(self._config.probabilities.get(candidate, 1.0) for candidate in candidates)
+        if total_probability == 0: total_probability = 1.0
 
         # Calculamos la entropía de cada posible guess sobre los candidatos restantes
-        for g in guesses_to_test:
-            pattern_probs = defaultdict(float)
+        for test_word in words_to_test:
+            pattern_probabilities = defaultdict(float)
             
             # Simulación contra posibles respuestas
             for c in candidates:
-                pat = feedback(c, g)
-                prob_c = self._config.probabilities.get(c, 1.0) / total_prob
-                pattern_probs[pat] += prob_c
+                simmulated_pattern = feedback(c, test_word)
+                candidate_probability = self._config.probabilities.get(c, 1.0) / total_probability
+                pattern_probabilities[simmulated_pattern] += candidate_probability
             
             # Ecuación de Shannon con NumPy
-            p_array = np.array(list(pattern_probs.values()))
-            entropy = -np.sum(p_array * np.log2(p_array + 1e-9))
+            probabilities_array = np.array(list(pattern_probabilities.values()))
+            entropy = -np.sum(probabilities_array * np.log2(probabilities_array + 1e-9))
             
-            if entropy > max_entropy:
-                max_entropy = entropy
-                best_guess = g
+            # Si la palabra es un candidato real, le damos un bono de 0.1
+            is_valid_candidate = 1.0 if test_word in candidates else 0.0
+            final_score = entropy + (0.1 * is_valid_candidate)
 
+            # Evaluamos contra el max_score en lugar de solo la entropía
+            if final_score > max_score:
+                max_score = final_score
+                best_guess = test_word
+        
         return best_guess

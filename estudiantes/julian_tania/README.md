@@ -1,6 +1,26 @@
-# Team Template
+# Estrategia EntropyMaster: Julián y Tania
 
-Copy this directory to create your team workspace:
+## Descripción General
+Nuestra IA, `EntropyMaster_julian_tania`, utiliza una estrategia híbrida basada en la Teoría de la Información (Entropía de Shannon) y el concepto de Score Esperado.
+
+Lo optimizamos con operaciones matriciales en `numpy` para respetar el límite de 5 segundos por juego. 
+
+Nuestro algoritmo divide el juego en 3 fases estratégicas:
+
+### 1. Fase 1: Openers (Precomputación)
+Primero precalculamos el máximo global de entropía para cada configuración del juego de manera offline. Así, en el primer turno ya tenemos el opener inmediato. Esto nos garantiza la mayor ganancia de información en 0.001 segundos, guardando nuestro presupuesto de CPU para los turnos siguientes.
+
+### 2. Fase 2: Aprendizaje y Exploración
+Utilizamos la ecuación de Shannon con NumPy para evaluar la ganancia de información (en *bits*) de posibles jugadas.
+- **Evitar el timeout:** Si hay más de 150 candidatos, tomamos una muestra representativa (`random.sample`) para mantener la eficiencia.
+- **Estrategia de exploración:** Si hay entre 3 y 15 palabras restantes que comparten casi todas las letras, sacrificamos un turno para ganar información al inyectar palabras de todo el vocabulario. Asegura la victoria en empates. 
+- **Bono de decisión:** Si la palabra a probar es candidata a ser la solución, al evaluar si es opción para el siguiente turno, se le otorga un bono matemático de `+0.1`. De esta manera, si hay empate en cuanto a la entropía o ganancia de información con una palabra no candidata, gane la que tiene probabilidad de ser la solución.
+
+### 3. Fase 3: Score Esperado
+Cuando el espacio de búsqueda se reduce a 2 palabras o menos, o si estamos en nuestro último intento (turno 6), apagamos el motor de Shannon. Se ordenan las opciones restantes basándose puramente en su probabilidad de ocurrencia en español (sigmoide de frecuencias) y va por la más probable.
+
+
+## Copy this directory to create your team workspace:
 
 ```bash
 cp -r estudiantes/_template estudiantes/your_team_name

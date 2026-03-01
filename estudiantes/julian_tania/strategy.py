@@ -1,8 +1,3 @@
-"""Strategy template — copy this directory to estudiantes/<your_team>/
-
-Rename the class and the ``name`` property, then implement your logic
-in the ``guess`` method.
-"""
 
 from __future__ import annotations
 import numpy as np
@@ -69,18 +64,6 @@ class MyStrategy(Strategy):
 
         if not candidates:
             return self._vocab[0]
-
-        # -------------------------------------------------------
-        # YOUR LOGIC HERE
-        # Replace the line below with your strategy.
-        # You have access to:
-        #   - candidates: remaining valid words
-        #   - self._config.probabilities: word -> probability
-        #   - self._config.mode: "uniform" or "frequency"
-        #   - self._config.word_length: 4, 5, or 6
-        #   - feedback(secret, guess): compute feedback pattern
-        #   - filter_candidates(words, guess, pattern): filter words
-        # -------------------------------------------------------
 
         # Caso de un solo candidato restante por si acaso
         if len(candidates) == 1:

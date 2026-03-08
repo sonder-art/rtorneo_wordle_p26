@@ -10,16 +10,22 @@ La idea central es que en cada turno hay que elegir la palabra que más reduzca 
 ## Lógica
 
 ### 1. Primera palabra (Opener)
-En el primer turno siempre usamos una palabra pre-calculada que maximiza la información:
+Calculamos offline el opener óptimo para cada configuración ejecutando 
+nuestra función de entropía sobre el vocabulario completo. El script 
+evalúa cada palabra del vocabulario como candidata a opener y elige 
+la que maximiza la entropía de Shannon contra todos los candidatos.
 
-| Longitud | Modo      | Opener   |
-|----------|-----------|----------|
-| 4 letras | uniform   | `sale`   |
-| 4 letras | frequency | `cora`   |
-| 5 letras | uniform   | `careo`  |
-| 5 letras | frequency | `careo`  |
-| 6 letras | uniform   | `careto` |
-| 6 letras | frequency | `cerito` |
+Si el torneo usa un vocabulario diferente, el código tiene un fallback 
+que calcula el opener dinámicamente en <codigo>begin_game()</codigo>.
+
+| Longitud | Modo      | Opener   | Entropía |
+|----------|-----------|----------|----------|
+| 4 letras | uniform   | `sale`   | 7.10 bits |
+| 4 letras | frequency | `cora`   | 6.89 bits |
+| 5 letras | uniform   | `careo`  | 8.21 bits |
+| 5 letras | frequency | `careo`  | 7.99 bits |
+| 6 letras | uniform   | `careto` | 9.10 bits |
+| 6 letras | frequency | `cerito` | 8.88 bits |
 
 Estas palabras cubren las letras más frecuentes del español y reducen al máximo los candidatos desde el primer turno.
 
@@ -51,12 +57,12 @@ Cuando los candidatos restantes caben en los turnos disponibles, dejamos de expl
 
 | Longitud | Modo      | Resueltos | Media de intentos |
 |----------|-----------|-----------|-------------------|
-| 4 letras | uniform   | 100%      | ~4.30             |
-| 4 letras | frequency | 100%      | ~4.55             |
+| 4 letras | uniform   | 100%      | ~4.70             |
+| 4 letras | frequency | 100%      | ~4.50             |
 | 5 letras | uniform   | 100%      | ~3.80             |
 | 5 letras | frequency | 100%      | ~3.80             |
 | 6 letras | uniform   | 100%      | ~3.25             |
-| 6 letras | frequency | 100%      | ~3.40             |
+| 6 letras | frequency | 100%      | ~3.30             |
 
 ## Herramientas usadas
 
